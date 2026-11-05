@@ -1,0 +1,5 @@
+<h1>Booking received</h1>
+<p>Hello {{ customer.first_name }},</p>
+<p>Your booking request <strong>{{ reservation.reference }}</strong> is recorded.</p>
+<p>{{ vehicle }} — {{ reservation.pickup_datetime }} to {{ reservation.return_datetime }}</p>
+<p>Total: ₹{{ reservation.total_amount }}. Security deposit: ₹{{ reservation.security_deposit }}.</p>

@@ -1,0 +1,57 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Vehicles | Dashboard{% endblock %}
+
+{% block dashboard_content %}
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h2 mb-0">Vehicles</h1>
+    {% if user.role == "admin" %}
+      <a class="btn btn-primary" href="{% url 'dashboard:vehicle_add' %}">Add vehicle</a>
+    {% endif %}
+  </div>
+  <form method="get" class="row g-2 mb-3" role="search">
+    <div class="col"><label class="visually-hidden" for="vehicle-search">Search vehicles</label><input id="vehicle-search" class="form-control" name="q" value="{{ query }}" placeholder="Make, model, registration"></div>
+    <div class="col-auto"><label class="visually-hidden" for="vehicle-status-filter">Status</label><select class="form-select" id="vehicle-status-filter" name="status"><option value="">All statuses</option>{% for value,label in status_choices %}<option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <div class="col-auto"><button class="btn btn-outline-primary" type="submit">Search</button></div>
+  </form>
+  <div class="table-responsive">
+    <table class="table table-striped align-middle">
+      <thead><tr><th>Vehicle</th><th>Registration</th><th>Category</th><th>Location</th><th>Daily price</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for vehicle in vehicles %}
+          <tr>
+            <td>{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}</td>
+            <td>{{ vehicle.registration_number }}</td>
+            <td>{{ vehicle.category }}</td>
+            <td>{{ vehicle.location }}</td>
+            <td>₹{{ vehicle.daily_price }}</td>
+            <td><span class="status-badge status-{{ vehicle.status|lower }}">{{ vehicle.get_status_display }}</span></td>
+            <td>
+              <form class="d-flex flex-wrap gap-1" method="post" action="{% url 'dashboard:vehicle_status' vehicle.pk %}">
+                {% csrf_token %}
+                <label class="visually-hidden" for="status-{{ vehicle.pk }}">Change status</label>
+                <select class="form-select form-select-sm" id="status-{{ vehicle.pk }}" name="status" aria-label="Status for {{ vehicle }}">
+                  {% for value,label in status_form.fields.status.choices %}<option value="{{ value }}" {% if vehicle.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                </select>
+                <button class="btn btn-sm btn-outline-primary" type="submit">Update status</button>
+                {% if user.role == "admin" %}
+                  <a class="btn btn-sm btn-outline-secondary" href="{% url 'dashboard:vehicle_edit' vehicle.pk %}">Edit</a>
+                  {% if vehicle.status != "RETIRED" %}
+                    <button class="btn btn-sm btn-outline-danger" type="submit" formaction="{% url 'dashboard:vehicle_retire' vehicle.pk %}" formmethod="post" name="confirm_retire" value="yes" onclick="return window.confirm('Retire this vehicle from the fleet?')">Retire</button>
+                  {% endif %}
+                {% endif %}
+              </form>
+            </td>
+          </tr>
+        {% empty %}<tr><td colspan="7">No vehicles match this search.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if is_paginated %}
+    <nav aria-label="Vehicle pages"><ul class="pagination">
+      {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?q={{ query|urlencode }}&amp;status={{ request.GET.status|urlencode }}&amp;page={{ page_obj.previous_page_number }}">Previous</a></li>{% endif %}
+      <li class="page-item active"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+      {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?q={{ query|urlencode }}&amp;status={{ request.GET.status|urlencode }}&amp;page={{ page_obj.next_page_number }}">Next</a></li>{% endif %}
+    </ul></nav>
+  {% endif %}
+{% endblock %}

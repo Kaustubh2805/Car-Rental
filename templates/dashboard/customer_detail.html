@@ -1,0 +1,23 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Customer {{ customer.email }} | Dashboard{% endblock %}
+
+{% block dashboard_content %}
+  <div class="d-flex justify-content-between align-items-start">
+    <div><h1 class="h2">{{ customer.get_full_name|default:customer.email }}</h1><p>{{ customer.email }} · {{ customer.phone|default:"No phone" }}</p></div>
+    {% if user.role == "admin" %}
+      <form method="post" action="{% url 'dashboard:customer_activation' customer.pk %}">
+        {% csrf_token %}
+        {% if customer.is_active %}<input type="hidden" name="active" value="false"><button class="btn btn-outline-danger" type="submit">Deactivate</button>
+        {% else %}<input type="hidden" name="active" value="true"><button class="btn btn-success" type="submit">Reactivate</button>{% endif %}
+      </form>
+    {% endif %}
+  </div>
+  {% if customer.customer_profile %}
+    <section class="card card-body mb-4"><h2 class="h5">Customer profile</h2><p>{{ customer.customer_profile.address|default:"Address not provided" }}{% if customer.customer_profile.city %}, {{ customer.customer_profile.city }}{% endif %}{% if customer.customer_profile.state %}, {{ customer.customer_profile.state }}{% endif %}</p><p class="mb-0">Licence expiry: {{ customer.customer_profile.licence_expiry|default:"Not provided" }}</p></section>
+  {% endif %}
+  <h2 class="h4">Rental history</h2>
+  <div class="table-responsive"><table class="table table-striped"><thead><tr><th>Reference</th><th>Vehicle</th><th>Pickup</th><th>Return</th><th>Status</th></tr></thead>
+    <tbody>{% for reservation in customer.reservations.all %}<tr><td><a href="{% url 'dashboard:reservation_detail' reservation.pk %}">{{ reservation.reference }}</a></td><td>{{ reservation.vehicle }}</td><td>{{ reservation.pickup_datetime|date:"M j, Y H:i" }}</td><td>{{ reservation.return_datetime|date:"M j, Y H:i" }}</td><td><span class="status-badge status-{{ reservation.status|lower }}">{{ reservation.get_status_display }}</span></td></tr>{% empty %}<tr><td colspan="5">No rental history.</td></tr>{% endfor %}</tbody>
+  </table></div>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Create staff account | Dashboard{% endblock %}
+
+{% block dashboard_content %}
+  <h1 class="h2">Create staff account</h1>
+  <form method="post" class="card card-body">
+    {% csrf_token %}{{ form.non_field_errors }}
+    {% for field in form %}<div class="mb-3"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}</div>{% endfor %}
+    <div><button class="btn btn-primary" type="submit">Create account</button></div>
+  </form>
+{% endblock %}

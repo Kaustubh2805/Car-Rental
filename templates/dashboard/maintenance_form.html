@@ -1,0 +1,14 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Add maintenance block | Dashboard{% endblock %}
+
+{% block dashboard_content %}
+  <h1 class="h2">Add maintenance block</h1>
+  <form method="post" class="card card-body">
+    {% csrf_token %}{{ form.non_field_errors }}
+    {% for field in form %}
+      <div class="mb-3"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}</div>
+    {% endfor %}
+    <div><button class="btn btn-primary" type="submit">Save block</button> <a class="btn btn-outline-secondary" href="{% url 'dashboard:maintenance' %}">Cancel</a></div>
+  </form>
+{% endblock %}

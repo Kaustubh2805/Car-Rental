@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}My bookings | Car Rental{% endblock %}
+
+{% block content %}
+  <h1 class="h2 mb-4">My bookings</h1>
+  <ul class="nav nav-tabs mb-4" aria-label="Filter bookings by status">
+    {% for tab in tabs %}
+      <li class="nav-item">
+        <a class="nav-link {% if active_tab == tab %}active{% endif %}"
+           {% if active_tab == tab %}aria-current="page"{% endif %}
+           href="?tab={{ tab }}">
+          {{ tab|title }}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+
+  {% if reservations %}
+    <div class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead>
+          <tr>
+            <th scope="col">Reference</th>
+            <th scope="col">Vehicle</th>
+            <th scope="col">Pickup</th>
+            <th scope="col">Return</th>
+            <th scope="col">Status</th>
+            <th scope="col"><span class="visually-hidden">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for reservation in reservations %}
+            <tr>
+              <td>{{ reservation.reference }}</td>
+              <td>{{ reservation.vehicle }}</td>
+              <td>{{ reservation.pickup_datetime|date:"M j, Y H:i" }}</td>
+              <td>{{ reservation.return_datetime|date:"M j, Y H:i" }}</td>
+              <td>
+                <span class="status-badge status-{{ reservation.status|lower }}">
+                  {{ reservation.get_status_display }}
+                </span>
+              </td>
+              <td>
+                <a class="btn btn-sm btn-outline-primary"
+                   href="{% url 'bookings:detail' reservation.pk %}">
+                  Details
+                </a>
+                <a class="btn btn-sm btn-outline-secondary"
+                   href="{% url 'vehicles:list' %}?vehicle={{ reservation.vehicle_id }}">
+                  Book again
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if is_paginated %}
+      <nav aria-label="Booking pages">
+        <ul class="pagination justify-content-center">
+          {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link"
+                 href="?tab={{ active_tab }}&amp;page={{ page_obj.previous_page_number }}">
+                Previous
+              </a>
+            </li>
+          {% endif %}
+          <li class="page-item active" aria-current="page">
+            <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+          </li>
+          {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link"
+                 href="?tab={{ active_tab }}&amp;page={{ page_obj.next_page_number }}">
+                Next
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+  {% else %}
+    <div class="empty-state" role="status">
+      <h2 class="h5">No {{ active_tab }} bookings yet</h2>
+      <p>When you book a vehicle, it will appear here.</p>
+      <a href="{% url 'vehicles:list' %}" class="btn btn-outline-primary">Browse vehicles</a>
+    </div>
+  {% endif %}
+{% endblock %}

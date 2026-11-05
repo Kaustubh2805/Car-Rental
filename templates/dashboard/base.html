@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="row g-4 dashboard-layout">
+    <aside class="col-12 col-lg-3 col-xl-2" aria-label="Dashboard navigation">
+      <details class="dashboard-nav" open>
+        <summary class="d-lg-none btn btn-outline-secondary mb-3">Dashboard menu</summary>
+        <nav class="list-group">
+          <a class="list-group-item list-group-item-action" href="{% url 'dashboard:overview' %}">Overview</a>
+          <a class="list-group-item list-group-item-action" href="{% url 'dashboard:vehicles' %}">Vehicles</a>
+          <a class="list-group-item list-group-item-action" href="{% url 'dashboard:reservations' %}">Reservations</a>
+          <a class="list-group-item list-group-item-action" href="{% url 'dashboard:customers' %}">Customers</a>
+          {% if user.role == "admin" %}
+            <a class="list-group-item list-group-item-action" href="{% url 'dashboard:maintenance' %}">Maintenance</a>
+            <a class="list-group-item list-group-item-action" href="{% url 'dashboard:staff' %}">Staff management</a>
+            <a class="list-group-item list-group-item-action" href="{% url 'dashboard:audit_log' %}">Audit log</a>
+            <a class="list-group-item list-group-item-action" href="{% url 'dashboard:reports' %}">Reports</a>
+            <a class="list-group-item list-group-item-action" href="{% url 'dashboard:settings' %}">Pricing &amp; policies</a>
+          {% endif %}
+        </nav>
+      </details>
+    </aside>
+    <section class="col-12 col-lg-9 col-xl-10">
+      {% block dashboard_content %}{% endblock %}
+    </section>
+  </div>
+{% endblock %}

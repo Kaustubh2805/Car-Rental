@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+  <body>
+    <p>Hello {{ reservation.customer.get_full_name|default:reservation.customer.email }},</p>
+    <p>This is a reminder for your booking <strong>{{ reservation.reference }}</strong>.</p>
+    <p><strong>Vehicle:</strong> {{ reservation.vehicle }}</p>
+    {% if kind == "pickup" %}
+      <p><strong>Pickup:</strong> {{ reservation.pickup_datetime }} at {{ reservation.pickup_location }}</p>
+    {% else %}
+      <p><strong>Return:</strong> {{ reservation.return_datetime }} at {{ reservation.return_location }}</p>
+    {% endif %}
+    <p>Please have your driving licence available. Contact the rental branch if you need assistance.</p>
+  </body>
+</html>

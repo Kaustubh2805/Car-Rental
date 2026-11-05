@@ -1,0 +1,5 @@
+Hello {{ customer.first_name }},
+
+Your booking {{ reservation.reference }} has been updated.
+{{ vehicle }} — {{ reservation.pickup_datetime }} to {{ reservation.return_datetime }}
+Updated total: ₹{{ reservation.total_amount }}.

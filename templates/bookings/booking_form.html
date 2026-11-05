@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Book {{ vehicle }} | Car Rental{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+      <h1 class="h2">Book {{ vehicle }}</h1>
+      <p>₹{{ vehicle.daily_price }} per day · security deposit ₹{{ vehicle.security_deposit }}</p>
+      <form method="post" data-availability-url="{{ availability_url }}"
+            data-vehicle-id="{{ vehicle.pk }}" data-client-validation novalidate>
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="row g-3">
+          {% for field in form %}
+            <div class="col-12 {% if field.name == 'notes' %}col-lg-12{% else %}col-md-6{% endif %}">
+              <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+              {% for error in field.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+              {% endfor %}
+            </div>
+          {% endfor %}
+        </div>
+        <div class="mt-4 p-3 border rounded" aria-live="polite" aria-busy="false"
+             data-quote-region>
+          <strong>Live quote:</strong>
+          <span data-quote-output>Select pickup and return times to check.</span>
+          <span class="loading-indicator ms-2" data-quote-loading hidden>
+            <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+            <span>Checking availability</span>
+          </span>
+          <div class="small text-danger mt-1" data-availability-error></div>
+        </div>
+        <button class="btn btn-primary mt-3" type="submit">
+          Review booking
+        </button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

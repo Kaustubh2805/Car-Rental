@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+media/
+staticfiles/
+
+# Environment and editor files
+.env
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Test and coverage output
+.coverage
+htmlcov/
+.pytest_cache/

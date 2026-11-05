@@ -1,0 +1,24 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Pricing and policies | Dashboard{% endblock %}
+
+{% block dashboard_content %}
+  <h1 class="h2">Pricing and rental policies</h1>
+  <p class="text-body-secondary">
+    Changes affect new quotes and future cancellation or late-fee calculations.
+    Existing reservation price snapshots are not changed.
+  </p>
+  <form method="post" class="card card-body" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+      <div class="mb-3">
+        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+        {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+      </div>
+    {% endfor %}
+    <div><button class="btn btn-primary" type="submit">Save policies</button></div>
+  </form>
+{% endblock %}

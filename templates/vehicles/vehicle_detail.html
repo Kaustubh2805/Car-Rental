@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }} | Car Rental{% endblock %}
+
+{% block content %}
+  <p><a href="{% url 'vehicles:list' %}">&larr; Back to vehicles</a></p>
+  <div class="row g-4">
+    <div class="col-12 col-lg-7">
+      <div class="row g-3">
+        {% for image in vehicle.images.all %}
+          <div class="{% if forloop.first %}col-12{% else %}col-6{% endif %}">
+            <img src="{{ image.image.url }}"
+                 class="img-fluid rounded vehicle-gallery-image"
+                 alt="{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }} photo {{ forloop.counter }}">
+          </div>
+        {% empty %}
+          <div class="col-12">
+            <div class="vehicle-image-placeholder vehicle-image-placeholder-large"
+                 role="img" aria-label="No vehicle photo available">
+              <span aria-hidden="true">Photo coming soon</span>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-5">
+      <p class="text-body-secondary mb-1">{{ vehicle.category }}</p>
+      <h1 class="h2">{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}</h1>
+      <p>{{ vehicle.description|default:"Contact us for more details about this vehicle." }}</p>
+      <h2 class="h5 mt-4">Specifications</h2>
+      <dl class="row">
+        <dt class="col-6">Transmission</dt><dd class="col-6">{{ vehicle.get_transmission_display }}</dd>
+        <dt class="col-6">Fuel</dt><dd class="col-6">{{ vehicle.get_fuel_type_display }}</dd>
+        <dt class="col-6">Seats</dt><dd class="col-6">{{ vehicle.seats }}</dd>
+        <dt class="col-6">Luggage capacity</dt><dd class="col-6">{{ vehicle.luggage_capacity }}</dd>
+        <dt class="col-6">Pickup location</dt><dd class="col-6">{{ vehicle.location.name }}, {{ vehicle.location.city }}</dd>
+        <dt class="col-6">Odometer</dt><dd class="col-6">{{ vehicle.odometer_km }} km</dd>
+      </dl>
+
+      <h2 class="h5">Features</h2>
+      <ul>
+        {% for feature in vehicle.features.all %}
+          <li>{{ feature.name }}</li>
+        {% empty %}
+          <li>Features to be confirmed.</li>
+        {% endfor %}
+      </ul>
+      <div class="card card-body mt-4 sticky-booking-card">
+        <p class="h4 mb-1">₹{{ vehicle.daily_price }} <span class="fs-6 fw-normal">/ day</span></p>
+        {% if vehicle.weekly_discount_pct %}
+          <p class="mb-1">{{ vehicle.weekly_discount_pct }}% discount for weekly rentals</p>
+        {% endif %}
+        <p class="mb-3">Security deposit: ₹{{ vehicle.security_deposit }}</p>
+        <div class="border-top pt-3">
+          <h2 class="h6">Booking</h2>
+          <p class="text-body-secondary">
+            Sign in as a customer and select your rental dates to check availability.
+          </p>
+          <a class="btn btn-primary"
+             href="{% url 'bookings:start' vehicle_id=vehicle.pk %}">
+            Check dates and book
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

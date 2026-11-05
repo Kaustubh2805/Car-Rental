@@ -1,0 +1,347 @@
+:root {
+  color-scheme: light;
+  --brand: #075e54;
+  --brand-dark: #06483f;
+  --brand-soft: #e8f4f1;
+  --ink: #172b28;
+  --muted: #52635f;
+  --surface: #ffffff;
+  --surface-muted: #f4f8f7;
+  --focus: #f0a202;
+  --status-available-bg: #d7f0e2;
+  --status-available-fg: #14532d;
+  --status-pending-bg: #fff0c2;
+  --status-pending-fg: #684b00;
+  --status-active-bg: #dcecff;
+  --status-active-fg: #123f78;
+  --status-cancelled-bg: #ffe0e0;
+  --status-cancelled-fg: #7f1d1d;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: var(--ink);
+  background: #fbfdfc;
+}
+
+main {
+  flex: 1;
+}
+
+a {
+  color: var(--brand);
+}
+
+a:hover {
+  color: var(--brand-dark);
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.skip-link:focus {
+  position: absolute;
+  z-index: 1050;
+  top: 0.5rem;
+  left: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #fff;
+  color: #111;
+  border: 2px solid var(--brand);
+  border-radius: 0.5rem;
+}
+
+.navbar.bg-dark {
+  background-color: var(--brand-dark) !important;
+}
+
+.navbar .nav-link,
+.navbar .navbar-brand {
+  color: #fff;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link:focus-visible {
+  color: #d5f4ed;
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--brand);
+  --bs-btn-border-color: var(--brand);
+  --bs-btn-hover-bg: var(--brand-dark);
+  --bs-btn-hover-border-color: var(--brand-dark);
+  --bs-btn-active-bg: var(--brand-dark);
+  --bs-btn-active-border-color: var(--brand-dark);
+  --bs-btn-disabled-bg: #667d78;
+  --bs-btn-disabled-border-color: #667d78;
+  --bs-btn-focus-shadow-rgb: 7, 94, 84;
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--brand);
+  --bs-btn-border-color: var(--brand);
+  --bs-btn-hover-bg: var(--brand);
+  --bs-btn-hover-border-color: var(--brand);
+  --bs-btn-active-bg: var(--brand-dark);
+  --bs-btn-active-border-color: var(--brand-dark);
+}
+
+.form-control,
+.form-select,
+.btn {
+  min-height: 2.75rem;
+}
+
+.btn-sm {
+  min-height: 2.5rem;
+}
+
+.card {
+  --bs-card-border-color: #dce7e4;
+  --bs-card-border-radius: 1rem;
+  box-shadow: 0 0.25rem 1.15rem rgb(18 55 48 / 6%);
+}
+
+.home-hero {
+  margin: 0.5rem 0 2.5rem;
+  padding: clamp(2.5rem, 8vw, 5rem) 1rem;
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(circle at 85% 20%, rgb(191 232 220 / 55%), transparent 34%),
+    linear-gradient(135deg, #e8f4f1 0%, #f6faf8 62%, #fff 100%);
+}
+
+.home-hero h1 {
+  max-width: 48rem;
+  margin-inline: auto;
+  color: var(--brand-dark);
+  letter-spacing: -0.035em;
+}
+
+.home-search-card {
+  max-width: 58rem;
+  border: 1px solid #d5e6e1;
+}
+
+.section-heading {
+  margin-bottom: 1.25rem;
+}
+
+.vehicle-card {
+  overflow: hidden;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.vehicle-card:hover,
+.vehicle-card:focus-within {
+  transform: translateY(-2px);
+  box-shadow: 0 0.6rem 1.5rem rgb(18 55 48 / 12%);
+}
+
+.vehicle-card-image,
+.vehicle-gallery-image {
+  width: 100%;
+  object-fit: cover;
+  background: #e9f0ee;
+}
+
+.vehicle-card-image {
+  height: 13rem;
+}
+
+.vehicle-gallery-image {
+  max-height: 28rem;
+}
+
+.vehicle-image-placeholder {
+  min-height: 13rem;
+  display: grid;
+  place-items: center;
+  background: #e9f0ee;
+  color: #344b45;
+}
+
+.vehicle-image-placeholder-large {
+  min-height: 22rem;
+}
+
+.sticky-booking-card {
+  position: sticky;
+  top: 1rem;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.65rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.status-available,
+.status-confirmed,
+.status-completed,
+.status-paid {
+  color: var(--status-available-fg);
+  background: var(--status-available-bg);
+}
+
+.status-pending {
+  color: var(--status-pending-fg);
+  background: var(--status-pending-bg);
+}
+
+.status-active {
+  color: var(--status-active-fg);
+  background: var(--status-active-bg);
+}
+
+.status-cancelled,
+.status-retired,
+.status-failed {
+  color: var(--status-cancelled-fg);
+  background: var(--status-cancelled-bg);
+}
+
+.status-maintenance,
+.status-refunded {
+  color: #3e315f;
+  background: #ece5fa;
+}
+
+.empty-state {
+  padding: clamp(1.5rem, 5vw, 3rem);
+  text-align: center;
+  border: 1px dashed #a9c2ba;
+  border-radius: 1rem;
+  background: var(--surface-muted);
+}
+
+.empty-state h2,
+.empty-state h3 {
+  color: var(--brand-dark);
+}
+
+.table-responsive {
+  border-radius: 0.75rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive table {
+  margin-bottom: 0;
+}
+
+.dashboard-nav .list-group-item {
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+}
+
+.toast-container {
+  z-index: 1090;
+}
+
+.toast {
+  min-width: min(22rem, calc(100vw - 2rem));
+  box-shadow: 0 0.5rem 1.5rem rgb(18 35 32 / 18%);
+}
+
+.toast-message {
+  color: #142a25;
+}
+
+.toast-message.toast-success {
+  border-left: 0.35rem solid #146c43;
+}
+
+.toast-message.toast-error {
+  border-left: 0.35rem solid #b02a37;
+}
+
+.toast-message.toast-warning {
+  border-left: 0.35rem solid #8a6400;
+}
+
+.toast-message.toast-info {
+  border-left: 0.35rem solid #0a58ca;
+}
+
+.loading-indicator[hidden] {
+  display: none !important;
+}
+
+.loading-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.how-it-works-step {
+  height: 100%;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  background: var(--surface-muted);
+}
+
+.site-footer {
+  color: #e8f4f1;
+  background: var(--brand-dark);
+}
+
+.site-footer a {
+  color: #fff;
+}
+
+@media (max-width: 991.98px) {
+  .catalog-filters.offcanvas-lg {
+    --bs-offcanvas-width: min(22rem, 90vw);
+  }
+
+  .sticky-booking-card {
+    position: static;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+@media print {
+  nav,
+  footer,
+  .btn,
+  .skip-link {
+    display: none !important;
+  }
+
+  main.container {
+    width: 100%;
+    max-width: none;
+    padding: 0;
+  }
+
+  body {
+    min-height: 0;
+    display: block;
+    background: #fff;
+  }
+}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Review booking | Car Rental{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+      <h1 class="h2">Review your booking</h1>
+      <p class="lead">{{ vehicle }}</p>
+      <dl class="row">
+        <dt class="col-6">Pickup</dt>
+        <dd class="col-6">{{ form.cleaned_data.pickup_datetime }}</dd>
+        <dt class="col-6">Return</dt>
+        <dd class="col-6">{{ form.cleaned_data.return_datetime }}</dd>
+        <dt class="col-6">Pickup location</dt>
+        <dd class="col-6">{{ form.cleaned_data.pickup_location }}</dd>
+        <dt class="col-6">Return location</dt>
+        <dd class="col-6">{{ form.cleaned_data.return_location }}</dd>
+        <dt class="col-6">Rental days</dt>
+        <dd class="col-6">{{ quote.rental_days }}</dd>
+      </dl>
+      <div class="card card-body mb-4">
+        <h2 class="h5">Price breakdown</h2>
+        <dl class="row mb-0">
+          <dt class="col-8">Rental ({{ quote.rental_days }} days)</dt>
+          <dd class="col-4 text-end">₹{{ quote.base_amount }}</dd>
+          {% if quote.discount_amount %}
+            <dt class="col-8">Weekly discount</dt>
+            <dd class="col-4 text-end">−₹{{ quote.discount_amount }}</dd>
+          {% endif %}
+          <dt class="col-8">Tax ({{ quote.tax_rate_pct }}%)</dt>
+          <dd class="col-4 text-end">₹{{ quote.tax_amount }}</dd>
+          {% if quote.extras_amount %}
+            <dt class="col-8">Extras</dt>
+            <dd class="col-4 text-end">₹{{ quote.extras_amount }}</dd>
+          {% endif %}
+          <dt class="col-8 fw-bold">Total</dt>
+          <dd class="col-4 text-end fw-bold">₹{{ quote.total_amount }}</dd>
+          <dt class="col-8">Security deposit (separate)</dt>
+          <dd class="col-4 text-end">₹{{ quote.security_deposit }}</dd>
+        </dl>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <button class="btn btn-primary" type="submit">Confirm booking</button>
+        <a class="btn btn-outline-secondary" href="{% url 'vehicles:detail' vehicle.pk %}">
+          Change dates
+        </a>
+      </form>
+    </div>
+  </div>
+{% endblock %}

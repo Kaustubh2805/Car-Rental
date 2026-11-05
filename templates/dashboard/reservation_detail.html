@@ -1,0 +1,42 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Reservation {{ reservation.reference }} | Dashboard{% endblock %}
+
+{% block dashboard_content %}
+  <h1 class="h2">Reservation {{ reservation.reference }}</h1>
+  <div class="card card-body mb-4">
+    <dl class="row mb-0">
+      <dt class="col-sm-3">Status</dt><dd class="col-sm-9"><span class="status-badge status-{{ reservation.status|lower }}">{{ reservation.get_status_display }}</span></dd>
+      <dt class="col-sm-3">Customer</dt><dd class="col-sm-9"><a href="{% url 'dashboard:customer_detail' reservation.customer_id %}">{{ reservation.customer.get_full_name|default:reservation.customer.email }}</a></dd>
+      <dt class="col-sm-3">Vehicle</dt><dd class="col-sm-9">{{ reservation.vehicle }} ({{ reservation.vehicle.registration_number }})</dd>
+      <dt class="col-sm-3">Pickup / return</dt><dd class="col-sm-9">{{ reservation.pickup_datetime|date:"M j, Y H:i" }} — {{ reservation.return_datetime|date:"M j, Y H:i" }}</dd>
+      <dt class="col-sm-3">Locations</dt><dd class="col-sm-9">{{ reservation.pickup_location }} — {{ reservation.return_location }}</dd>
+      <dt class="col-sm-3">Total</dt><dd class="col-sm-9">₹{{ reservation.total_amount }}</dd>
+      {% if reservation.actual_pickup_at %}<dt class="col-sm-3">Picked up</dt><dd class="col-sm-9">{{ reservation.actual_pickup_at|date:"M j, Y H:i" }} · {{ reservation.pickup_odometer }} km · fuel {{ reservation.fuel_level_out }}%</dd>{% endif %}
+      {% if reservation.actual_return_at %}<dt class="col-sm-3">Returned</dt><dd class="col-sm-9">{{ reservation.actual_return_at|date:"M j, Y H:i" }} · {{ reservation.return_odometer }} km · fuel {{ reservation.fuel_level_in }}% · late fee ₹{{ reservation.late_fee }}</dd>{% endif %}
+      {% if reservation.damage_notes %}<dt class="col-sm-3">Damage notes</dt><dd class="col-sm-9">{{ reservation.damage_notes|linebreaksbr }}</dd>{% endif %}
+    </dl>
+  </div>
+  <div class="d-flex flex-wrap gap-3">
+    {% if reservation.status == "PENDING" %}
+      <form method="post">{% csrf_token %}<input type="hidden" name="action" value="confirm"><button class="btn btn-success" type="submit">Confirm reservation</button></form>
+    {% endif %}
+    {% if reservation.status == "CONFIRMED" %}
+      <form method="post" class="card card-body">{% csrf_token %}<input type="hidden" name="action" value="pickup"><h2 class="h5">Mark picked up</h2>
+        {% for field in pickup_form %}<div class="mb-2"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}</div>{% endfor %}
+        <button class="btn btn-primary" type="submit">Record pickup</button>
+      </form>
+    {% endif %}
+    {% if reservation.status == "ACTIVE" %}
+      <form method="post" class="card card-body">{% csrf_token %}<input type="hidden" name="action" value="return"><h2 class="h5">Mark returned</h2>
+        <p>Estimated late fee if returned now: ₹{{ estimated_late_fee }}</p>
+        {% for field in return_form %}<div class="mb-2"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}</div>{% endfor %}
+        <button class="btn btn-primary" type="submit">Record return</button>
+      </form>
+    {% endif %}
+    {% if reservation.status == "PENDING" or reservation.status == "CONFIRMED" %}
+      <form method="post" onsubmit="return window.confirm('Cancel this reservation? The configured cancellation fee will apply.');">{% csrf_token %}<input type="hidden" name="action" value="cancel"><button class="btn btn-outline-danger" type="submit">Cancel reservation</button></form>
+    {% endif %}
+  </div>
+  <a class="btn btn-outline-secondary mt-3" href="{% url 'dashboard:reservations' %}">Back to reservations</a>
+{% endblock %}

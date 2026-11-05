@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Booking {{ reservation.reference }} | Car Rental{% endblock %}
+
+{% block content %}
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+      <h1 class="h2">Booking {{ reservation.reference }}</h1>
+      <span class="status-badge status-{{ reservation.status|lower }}">
+        {{ reservation.get_status_display }}
+      </span>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary"
+         href="{% url 'bookings:receipt' reservation.pk %}">View receipt</a>
+      <a class="btn btn-outline-secondary"
+         href="{% url 'bookings:my_bookings' %}">Back to my bookings</a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <section class="col-12 col-lg-7" aria-labelledby="rental-details-heading">
+      <div class="card card-body h-100">
+        <h2 class="h5" id="rental-details-heading">Rental details</h2>
+        <dl class="row mb-0">
+          <dt class="col-sm-5">Vehicle</dt><dd class="col-sm-7">{{ reservation.vehicle }}</dd>
+          <dt class="col-sm-5">Pickup</dt>
+          <dd class="col-sm-7">{{ reservation.pickup_datetime|date:"M j, Y H:i" }} — {{ reservation.pickup_location }}</dd>
+          <dt class="col-sm-5">Return</dt>
+          <dd class="col-sm-7">{{ reservation.return_datetime|date:"M j, Y H:i" }} — {{ reservation.return_location }}</dd>
+          <dt class="col-sm-5">Rental days</dt><dd class="col-sm-7">{{ reservation.rental_days }}</dd>
+          {% if reservation.notes %}
+            <dt class="col-sm-5">Notes</dt><dd class="col-sm-7">{{ reservation.notes|linebreaksbr }}</dd>
+          {% endif %}
+        </dl>
+      </div>
+    </section>
+
+    <section class="col-12 col-lg-5" aria-labelledby="price-details-heading">
+      <div class="card card-body">
+        <h2 class="h5" id="price-details-heading">Price breakdown</h2>
+        <dl class="row mb-0">
+          <dt class="col-8">Rental</dt><dd class="col-4 text-end">₹{{ reservation.base_amount }}</dd>
+          {% if reservation.discount_amount %}
+            <dt class="col-8">Discount</dt><dd class="col-4 text-end">−₹{{ reservation.discount_amount }}</dd>
+          {% endif %}
+          <dt class="col-8">Tax</dt><dd class="col-4 text-end">₹{{ reservation.tax_amount }}</dd>
+          {% if reservation.extras_amount %}
+            <dt class="col-8">Extras</dt><dd class="col-4 text-end">₹{{ reservation.extras_amount }}</dd>
+          {% endif %}
+          <dt class="col-8 fw-bold">Total</dt><dd class="col-4 text-end fw-bold">₹{{ reservation.total_amount }}</dd>
+          <dt class="col-8">Security deposit (separate)</dt><dd class="col-4 text-end">₹{{ reservation.security_deposit }}</dd>
+          {% if reservation.cancellation_fee %}
+            <dt class="col-8">Cancellation fee</dt><dd class="col-4 text-end">₹{{ reservation.cancellation_fee }}</dd>
+          {% endif %}
+          {% if reservation.late_fee %}
+            <dt class="col-8">Late fee</dt><dd class="col-4 text-end">₹{{ reservation.late_fee }}</dd>
+          {% endif %}
+        </dl>
+      </div>
+    </section>
+
+    <section class="col-12" aria-labelledby="payment-heading">
+      <div class="card card-body">
+        <h2 class="h5" id="payment-heading">Payments</h2>
+        {% if reservation.payments.all %}
+          <div class="table-responsive">
+            <table class="table table-sm mb-0">
+              <thead><tr><th>Method</th><th>Status</th><th>Amount</th><th>Paid at</th><th>Reference</th></tr></thead>
+              <tbody>
+                {% for payment in reservation.payments.all %}
+                  <tr>
+                    <td>{{ payment.get_method_display }}</td>
+                    <td>{{ payment.get_status_display }}</td>
+                    <td>₹{{ payment.amount }}</td>
+                    <td>{{ payment.paid_at|date:"M j, Y H:i"|default:"—" }}</td>
+                    <td>{{ payment.transaction_ref|default:"—" }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="mb-0">No payment has been recorded.</p>
+        {% endif %}
+      </div>
+    </section>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 mt-4">
+    {% if can_modify %}
+      <a class="btn btn-primary"
+         href="{% url 'bookings:modify' reservation.pk %}">Modify booking</a>
+    {% elif can_manage %}
+      <span class="text-body-secondary align-self-center">
+        Changes are not allowed within {{ modification_cutoff_hours }} hours of pickup.
+      </span>
+    {% endif %}
+    {% if can_cancel %}
+      <button class="btn btn-outline-danger" type="button"
+              data-bs-toggle="modal" data-bs-target="#cancel-booking-modal">
+        Cancel booking
+      </button>
+    {% endif %}
+    <a class="btn btn-outline-secondary"
+       href="{% url 'vehicles:list' %}?vehicle={{ reservation.vehicle_id }}">
+      Book this vehicle again
+    </a>
+  </div>
+
+  {% if can_cancel %}
+    <div class="modal fade" id="cancel-booking-modal" tabindex="-1"
+         aria-labelledby="cancel-booking-title" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 class="modal-title fs-5" id="cancel-booking-title">Cancel this booking?</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            {% if cancellation_fee_quote %}
+              The estimated cancellation fee is ₹{{ cancellation_fee_quote }}.
+              Cancellations more than {{ cancellation_free_hours }} hours before pickup
+              are free; otherwise the fee is {{ cancellation_fee_pct }}% of the booking total.
+            {% else %}
+              Cancellation is free because pickup is more than
+              {{ cancellation_free_hours }} hours away.
+            {% endif %}
+            The final fee is calculated when cancellation is confirmed.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal">Keep booking</button>
+            <form method="post" action="{% url 'bookings:cancel' reservation.pk %}">
+              {% csrf_token %}
+              <button class="btn btn-danger" type="submit">Confirm cancellation</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,5 @@
+Hello {{ customer.first_name }},
+
+Your booking request {{ reservation.reference }} is recorded.
+{{ vehicle }} — {{ reservation.pickup_datetime }} to {{ reservation.return_datetime }}
+Total: ₹{{ reservation.total_amount }}. Security deposit: ₹{{ reservation.security_deposit }}.

@@ -1,0 +1,61 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block title %}Dashboard overview | Car Rental{% endblock %}
+
+{% block dashboard_content %}
+  <h1 class="h2 mb-4">Operations overview</h1>
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-3 mb-4">
+    <div class="col"><div class="card card-body h-100"><span class="text-body-secondary">Total vehicles</span><strong class="fs-3">{{ total_vehicles }}</strong></div></div>
+    <div class="col"><div class="card card-body h-100"><span class="text-body-secondary">Available now</span><strong class="fs-3">{{ available_vehicles }}</strong></div></div>
+    <div class="col"><div class="card card-body h-100"><span class="text-body-secondary">Active rentals</span><strong class="fs-3">{{ active_rentals }}</strong></div></div>
+    <div class="col"><div class="card card-body h-100"><span class="text-body-secondary">Today's pickups</span><strong class="fs-3">{{ today_pickups }}</strong></div></div>
+    <div class="col"><div class="card card-body h-100"><span class="text-body-secondary">Today's returns</span><strong class="fs-3">{{ today_returns }}</strong></div></div>
+    <div class="col"><div class="card card-body h-100"><span class="text-body-secondary">Revenue this month</span><strong class="fs-3">₹{{ month_revenue }}</strong></div></div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-12 col-xl-6"><div class="card card-body"><h2 class="h5">Bookings per week</h2><canvas id="bookings-chart" aria-label="Bookings per week chart" role="img"></canvas></div></div>
+    <div class="col-12 col-xl-6"><div class="card card-body"><h2 class="h5">Revenue per month</h2><canvas id="revenue-chart" aria-label="Revenue per month chart" role="img"></canvas></div></div>
+  </div>
+
+  {{ weekly_labels|json_script:"weekly-labels" }}
+  {{ weekly_values|json_script:"weekly-values" }}
+  {{ revenue_labels|json_script:"revenue-labels" }}
+  {{ revenue_values|json_script:"revenue-values" }}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script>
+    const makeChart = (id, label, labelsId, valuesId, color) => {
+      const canvas = document.getElementById(id);
+      if (!canvas || !window.Chart) return;
+      new Chart(canvas, {
+        type: "bar",
+        data: {
+          labels: JSON.parse(document.getElementById(labelsId).textContent),
+          datasets: [{label, data: JSON.parse(document.getElementById(valuesId).textContent), backgroundColor: color}]
+        },
+        options: {responsive: true, plugins: {legend: {display: false}}}
+      });
+    };
+    makeChart("bookings-chart", "Bookings", "weekly-labels", "weekly-values", "#0d6efd");
+    makeChart("revenue-chart", "Revenue (₹)", "revenue-labels", "revenue-values", "#198754");
+  </script>
+
+  <h2 class="h4">Recent bookings</h2>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead><tr><th>Reference</th><th>Customer</th><th>Vehicle</th><th>Pickup</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for reservation in recent_reservations %}
+          <tr>
+            <td><a href="{% url 'dashboard:reservation_detail' reservation.pk %}">{{ reservation.reference }}</a></td>
+            <td>{{ reservation.customer.get_full_name|default:reservation.customer.email }}</td>
+            <td>{{ reservation.vehicle }}</td>
+            <td>{{ reservation.pickup_datetime|date:"M j, Y H:i" }}</td>
+            <td><span class="status-badge status-{{ reservation.status|lower }}">{{ reservation.get_status_display }}</span></td>
+          </tr>
+        {% empty %}<tr><td colspan="5">No bookings yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

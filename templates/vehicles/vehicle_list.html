@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Browse vehicles | Car Rental{% endblock %}
+
+{% block content %}
+  <header class="mb-4">
+    <h1 class="h2">Browse available vehicles</h1>
+    <p class="text-body-secondary">Choose a vehicle for your next journey.</p>
+  </header>
+
+  <button class="btn btn-outline-primary d-lg-none mb-3"
+          type="button" data-bs-toggle="offcanvas" data-bs-target="#vehicleFilters"
+          aria-controls="vehicleFilters">
+    Filters
+  </button>
+  <div class="offcanvas-lg offcanvas-start catalog-filters mb-4" tabindex="-1"
+       id="vehicleFilters" aria-labelledby="vehicleFiltersLabel">
+    <div class="offcanvas-header d-lg-none">
+      <h2 class="offcanvas-title h5" id="vehicleFiltersLabel">Filter vehicles</h2>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+              data-bs-target="#vehicleFilters" aria-label="Close filters"></button>
+    </div>
+    <div class="offcanvas-body p-0">
+      <form method="get" class="card card-body" aria-label="Filter vehicles"
+            data-client-validation>
+        <div class="row g-3">
+      <div class="col-12 col-sm-6 col-lg-3">
+        <label class="form-label" for="{{ filter_form.vehicle.id_for_label }}">Vehicle</label>
+        {{ filter_form.vehicle }}
+      </div>
+      <div class="col-12 col-sm-6 col-lg-3">
+        <label class="form-label" for="{{ filter_form.category.id_for_label }}">Category</label>
+        {{ filter_form.category }}
+      </div>
+      <div class="col-12 col-sm-6 col-lg-3">
+        <label class="form-label" for="{{ filter_form.transmission.id_for_label }}">Transmission</label>
+        {{ filter_form.transmission }}
+      </div>
+      <div class="col-12 col-sm-6 col-lg-3">
+        <label class="form-label" for="{{ filter_form.fuel_type.id_for_label }}">Fuel</label>
+        {{ filter_form.fuel_type }}
+      </div>
+      <div class="col-12 col-sm-6 col-lg-3">
+        <label class="form-label" for="{{ filter_form.seats.id_for_label }}">Minimum seats</label>
+        {{ filter_form.seats }}
+      </div>
+      <div class="col-6 col-lg-2">
+        <label class="form-label" for="{{ filter_form.min_price.id_for_label }}">Min daily price</label>
+        {{ filter_form.min_price }}
+      </div>
+      <div class="col-6 col-lg-2">
+        <label class="form-label" for="{{ filter_form.max_price.id_for_label }}">Max daily price</label>
+        {{ filter_form.max_price }}
+      </div>
+      <div class="col-12 col-sm-6 col-lg-3">
+        <label class="form-label" for="{{ filter_form.location.id_for_label }}">Location</label>
+        {{ filter_form.location }}
+      </div>
+      <div class="col-12 col-sm-6 col-lg-3">
+        <label class="form-label" for="{{ filter_form.pickup_datetime.id_for_label }}">Pickup</label>
+        {{ filter_form.pickup_datetime }}
+      </div>
+      <div class="col-12 col-sm-6 col-lg-3">
+        <label class="form-label" for="{{ filter_form.return_datetime.id_for_label }}">Return</label>
+        {{ filter_form.return_datetime }}
+      </div>
+      <div class="col-12 col-sm-6 col-lg-3">
+        <label class="form-label" for="{{ filter_form.sort.id_for_label }}">Sort by</label>
+        {{ filter_form.sort }}
+      </div>
+          <div class="col-12 col-lg-2 d-flex align-items-end gap-2">
+            <button class="btn btn-primary flex-grow-1" type="submit">Apply</button>
+            <a class="btn btn-outline-secondary" href="{% url 'vehicles:list' %}">Reset</a>
+          </div>
+        </div>
+        {% if filter_form.errors %}
+          <div class="alert alert-danger mt-3 mb-0" role="alert">
+            Please correct the filter values and try again.
+            {{ filter_form.errors }}
+          </div>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+
+  {% if vehicles %}
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+      {% for vehicle in vehicles %}
+        <div class="col">
+          <article class="card vehicle-card h-100">
+            {% with primary_image=vehicle.images.all|first %}
+              {% if primary_image %}
+                <img src="{% if primary_image.thumbnail %}{{ primary_image.thumbnail.url }}{% else %}{{ primary_image.image.url }}{% endif %}"
+                     class="card-img-top vehicle-card-image"
+                     alt="{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}">
+              {% else %}
+                <div class="vehicle-image-placeholder" role="img"
+                     aria-label="No vehicle photo available">
+                  <span aria-hidden="true">Photo coming soon</span>
+                </div>
+              {% endif %}
+            {% endwith %}
+            <div class="card-body d-flex flex-column">
+              <p class="small text-body-secondary mb-1">
+                {{ vehicle.category }} · {{ vehicle.location.city }}
+              </p>
+              <h2 class="h5 card-title">{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}</h2>
+              <p class="card-text">
+                {{ vehicle.transmission|title }} · {{ vehicle.fuel_type|title }} ·
+                {{ vehicle.seats }} seats
+              </p>
+              <p class="fw-semibold mt-auto mb-3">
+                ₹{{ vehicle.daily_price }} <span class="fw-normal">/ day</span>
+              </p>
+              <a class="btn btn-outline-primary"
+                 href="{% url 'vehicles:detail' vehicle.pk %}">
+                View vehicle
+              </a>
+            </div>
+          </article>
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+      <nav class="mt-4" aria-label="Vehicle pages">
+        <ul class="pagination justify-content-center">
+          {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link"
+                 href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">
+                Previous
+              </a>
+            </li>
+          {% endif %}
+          <li class="page-item active" aria-current="page">
+            <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+          </li>
+          {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link"
+                 href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ page_obj.next_page_number }}">
+                Next
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+  {% else %}
+    <div class="empty-state" role="status">
+      <h2 class="h5">No vehicles found</h2>
+      <p>No available vehicles match these filters.</p>
+      <a class="btn btn-outline-primary" href="{% url 'vehicles:list' %}">Clear filters</a>
+    </div>
+  {% endif %}
+{% endblock %}

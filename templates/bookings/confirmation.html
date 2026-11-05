@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Booking {{ reservation.reference }} | Car Rental{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+      <div class="alert alert-success" role="status">
+        <h1 class="h3">Booking {{ reservation.get_status_display|lower }}</h1>
+        <p class="mb-0">Your reference number is
+          <strong>{{ reservation.reference }}</strong>.
+        </p>
+      </div>
+      <h2 class="h5">{{ reservation.vehicle }}</h2>
+      <dl class="row">
+        <dt class="col-6">Pickup</dt>
+        <dd class="col-6">{{ reservation.pickup_datetime }}</dd>
+        <dt class="col-6">Return</dt>
+        <dd class="col-6">{{ reservation.return_datetime }}</dd>
+        <dt class="col-6">Pickup location</dt>
+        <dd class="col-6">{{ reservation.pickup_location }}</dd>
+        <dt class="col-6">Return location</dt>
+        <dd class="col-6">{{ reservation.return_location }}</dd>
+        <dt class="col-6">Total</dt>
+        <dd class="col-6">₹{{ reservation.total_amount }}</dd>
+        <dt class="col-6">Security deposit</dt>
+        <dd class="col-6">₹{{ reservation.security_deposit }}</dd>
+        <dt class="col-6">Payment</dt>
+        <dd class="col-6">
+          {% for payment in reservation.payments.all %}
+            {{ payment.get_method_display }} — {{ payment.get_status_display }}
+          {% empty %}
+            Payment selection pending
+          {% endfor %}
+        </dd>
+      </dl>
+      {% if reservation.status == "PENDING" or reservation.status == "CONFIRMED" %}
+        <a class="btn btn-outline-primary"
+           href="{% url 'bookings:modify' reservation.pk %}">Modify booking</a>
+        <form method="post" action="{% url 'bookings:cancel' reservation.pk %}">
+          {% csrf_token %}
+          <button class="btn btn-outline-danger" type="submit">Cancel booking</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

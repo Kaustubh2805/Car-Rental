@@ -1,0 +1,4 @@
+Hello {{ customer.first_name }},
+
+Your booking {{ reservation.reference }} has been cancelled.
+Cancellation fee: ₹{{ reservation.cancellation_fee }}.

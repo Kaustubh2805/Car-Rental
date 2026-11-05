@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Home | Car Rental{% endblock %}
+
+{% block content %}
+  <section class="home-hero text-center" aria-labelledby="home-heading">
+    <p class="text-uppercase fw-semibold small mb-2">Your journey, your way</p>
+    <h1 id="home-heading" class="display-5 fw-bold">Find a car for the road ahead</h1>
+    <p class="lead col-lg-8 mx-auto my-3">
+      Flexible rentals, clear pricing, and a vehicle that fits your plans.
+    </p>
+    <form method="get" action="{% url 'vehicles:list' %}"
+          class="card card-body home-search-card mx-auto text-start"
+          data-client-validation>
+      <h2 class="h5">Search by rental dates</h2>
+      <div class="row g-3 align-items-end">
+        <div class="col-12 col-md-5">
+          <label class="form-label" for="{{ date_range_form.pickup_datetime.id_for_label }}">
+            Pickup date and time
+          </label>
+          {{ date_range_form.pickup_datetime }}
+        </div>
+        <div class="col-12 col-md-5">
+          <label class="form-label" for="{{ date_range_form.return_datetime.id_for_label }}">
+            Return date and time
+          </label>
+          {{ date_range_form.return_datetime }}
+        </div>
+        <div class="col-12 col-md-2">
+          <button class="btn btn-primary w-100" type="submit">Find cars</button>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <section class="mb-5" aria-labelledby="featured-heading">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 section-heading">
+      <div>
+        <h2 id="featured-heading" class="h3 mb-1">Featured vehicles</h2>
+        <p class="text-body-secondary mb-0">A few vehicles ready for your next trip.</p>
+      </div>
+      <a class="btn btn-outline-primary" href="{% url 'vehicles:list' %}">Browse all vehicles</a>
+    </div>
+    {% if featured_vehicles %}
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+        {% for vehicle in featured_vehicles %}
+          <div class="col">
+            <article class="card vehicle-card h-100">
+              {% with primary_image=vehicle.images.all|first %}
+                {% if primary_image %}
+                  <img src="{% if primary_image.thumbnail %}{{ primary_image.thumbnail.url }}{% else %}{{ primary_image.image.url }}{% endif %}"
+                       class="card-img-top vehicle-card-image"
+                       alt="{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}">
+                {% else %}
+                  <div class="vehicle-image-placeholder" role="img"
+                       aria-label="No photo available for {{ vehicle }}">
+                    <span aria-hidden="true">Photo coming soon</span>
+                  </div>
+                {% endif %}
+              {% endwith %}
+              <div class="card-body d-flex flex-column">
+                <p class="small text-body-secondary mb-1">{{ vehicle.category }} · {{ vehicle.location.city }}</p>
+                <h3 class="h5">{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}</h3>
+                <p class="text-body-secondary">{{ vehicle.seats }} seats · {{ vehicle.get_transmission_display }}</p>
+                <p class="fw-semibold mt-auto">₹{{ vehicle.daily_price }} <span class="fw-normal">/ day</span></p>
+                <a class="btn btn-outline-primary" href="{% url 'vehicles:detail' vehicle.pk %}">
+                  View vehicle
+                </a>
+              </div>
+            </article>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <h3 class="h5">New vehicles are on the way</h3>
+        <p class="mb-0">Check back soon or browse our full catalog.</p>
+      </div>
+    {% endif %}
+  </section>
+
+  <section class="mb-5" aria-labelledby="how-it-works-heading">
+    <h2 id="how-it-works-heading" class="h3 section-heading">How it works</h2>
+    <div class="row g-3">
+      <div class="col-12 col-md-4"><article class="how-it-works-step"><h3 class="h5">1. Choose your dates</h3><p class="mb-0">Search available vehicles for the dates you need.</p></article></div>
+      <div class="col-12 col-md-4"><article class="how-it-works-step"><h3 class="h5">2. Book with confidence</h3><p class="mb-0">Review the full quote, including tax and deposit, before confirming.</p></article></div>
+      <div class="col-12 col-md-4"><article class="how-it-works-step"><h3 class="h5">3. Pick up and go</h3><p class="mb-0">Collect your vehicle at the selected location and enjoy the drive.</p></article></div>
+    </div>
+  </section>
+{% endblock %}

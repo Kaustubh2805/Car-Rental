@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Receipt {{ reservation.reference }} | Car Rental{% endblock %}
+
+{% block content %}
+  <article class="mx-auto" style="max-width: 800px">
+    <header class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+      <div>
+        <h1 class="h2">Rental receipt / invoice</h1>
+        <p class="mb-0">Reference: <strong>{{ reservation.reference }}</strong></p>
+      </div>
+      <button class="btn btn-primary" type="button" onclick="window.print()">
+        Print receipt
+      </button>
+    </header>
+
+    <section class="mb-4">
+      <h2 class="h5">Customer and rental</h2>
+      <dl class="row">
+        <dt class="col-sm-4">Customer</dt><dd class="col-sm-8">{{ reservation.customer.get_full_name|default:reservation.customer.email }}</dd>
+        <dt class="col-sm-4">Vehicle</dt><dd class="col-sm-8">{{ reservation.vehicle }}</dd>
+        <dt class="col-sm-4">Pickup</dt><dd class="col-sm-8">{{ reservation.pickup_datetime|date:"M j, Y H:i" }} at {{ reservation.pickup_location }}</dd>
+        <dt class="col-sm-4">Return</dt><dd class="col-sm-8">{{ reservation.return_datetime|date:"M j, Y H:i" }} at {{ reservation.return_location }}</dd>
+        <dt class="col-sm-4">Status</dt><dd class="col-sm-8">{{ reservation.get_status_display }}</dd>
+      </dl>
+    </section>
+
+    <section class="mb-4">
+      <h2 class="h5">Price breakdown</h2>
+      <table class="table">
+        <tbody>
+          <tr><th scope="row">Rental ({{ reservation.rental_days }} day{{ reservation.rental_days|pluralize }})</th><td class="text-end">₹{{ reservation.base_amount }}</td></tr>
+          {% if reservation.discount_amount %}<tr><th scope="row">Discount</th><td class="text-end">−₹{{ reservation.discount_amount }}</td></tr>{% endif %}
+          <tr><th scope="row">Tax</th><td class="text-end">₹{{ reservation.tax_amount }}</td></tr>
+          {% if reservation.extras_amount %}<tr><th scope="row">Extras</th><td class="text-end">₹{{ reservation.extras_amount }}</td></tr>{% endif %}
+          <tr class="fw-bold"><th scope="row">Total</th><td class="text-end">₹{{ reservation.total_amount }}</td></tr>
+          <tr><th scope="row">Security deposit (separate)</th><td class="text-end">₹{{ reservation.security_deposit }}</td></tr>
+          {% if reservation.cancellation_fee %}<tr><th scope="row">Cancellation fee</th><td class="text-end">₹{{ reservation.cancellation_fee }}</td></tr>{% endif %}
+          {% if reservation.late_fee %}<tr><th scope="row">Late fee</th><td class="text-end">₹{{ reservation.late_fee }}</td></tr>{% endif %}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="mb-4">
+      <h2 class="h5">Payment information</h2>
+      {% if reservation.payments.all %}
+        <table class="table">
+          <thead><tr><th>Method</th><th>Status</th><th>Amount</th><th>Paid at</th><th>Reference</th></tr></thead>
+          <tbody>
+            {% for payment in reservation.payments.all %}
+              <tr>
+                <td>{{ payment.get_method_display }}</td>
+                <td>{{ payment.get_status_display }}</td>
+                <td>₹{{ payment.amount }}</td>
+                <td>{{ payment.paid_at|date:"M j, Y H:i"|default:"—" }}</td>
+                <td>{{ payment.transaction_ref|default:"—" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>No payment has been recorded.</p>
+      {% endif %}
+    </section>
+
+    <section class="mb-4">
+      <h2 class="h5">Rental terms</h2>
+      <ul>
+        <li>The security deposit is separate from the rental total.</li>
+        <li>Cancellation is free more than {{ cancellation_free_hours }} hours before pickup; within that window the cancellation fee is {{ cancellation_fee_pct }}% of the rental total.</li>
+        <li>Late returns are charged at {{ pricing_settings.late_fee_multiplier }} times the daily rental price per late day.</li>
+        <li>Return the vehicle to the agreed location and report any damage or fuel-level changes.</li>
+      </ul>
+    </section>
+
+    <a class="btn btn-outline-secondary" href="{% url 'bookings:detail' reservation.pk %}">
+      Back to booking
+    </a>
+  </article>
+{% endblock %}

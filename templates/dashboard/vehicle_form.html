@@ -1,0 +1,32 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}{% if object %}Edit{% else %}Add{% endif %} vehicle | Dashboard{% endblock %}
+
+{% block dashboard_content %}
+  <h1 class="h2">{% if object %}Edit{% else %}Add{% endif %} vehicle</h1>
+  <form method="post" enctype="multipart/form-data" class="card card-body" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="row g-3">
+      {% for field in form %}
+        <div class="col-12 {% if field.name == 'description' or field.name == 'features' %}col-lg-12{% else %}col-md-6{% endif %}">
+          <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+        </div>
+      {% endfor %}
+      <div class="col-12">
+        <label class="form-label" for="vehicle-images">Upload images</label>
+        <input class="form-control" id="vehicle-images" type="file" name="images" accept="image/jpeg,image/png,image/webp" multiple>
+        <div class="form-text">Images must be valid JPEG, PNG, or WebP files no larger than 5 MB each.</div>
+      </div>
+      {% if vehicle_images %}
+        <div class="col-12"><h2 class="h5">Current images</h2><ul>{% for image in vehicle_images %}<li>{{ image.image.name }}{% if image.is_primary %} (primary){% endif %}</li>{% endfor %}</ul></div>
+      {% endif %}
+    </div>
+    <div class="mt-3 d-flex gap-2">
+      <button class="btn btn-primary" type="submit">Save vehicle</button>
+      <a class="btn btn-outline-secondary" href="{% url 'dashboard:vehicles' %}">Cancel</a>
+    </div>
+  </form>
+{% endblock %}

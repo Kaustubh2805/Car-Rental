@@ -1,0 +1,27 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Reservations | Dashboard{% endblock %}
+
+{% block dashboard_content %}
+  <h1 class="h2 mb-3">Reservations</h1>
+  <form method="get" class="card card-body mb-3">
+    <div class="row g-3">
+      {% for field in filter_form %}<div class="col-12 col-sm-6 col-xl-3"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}</div>{% endfor %}
+      <div class="col-12"><button class="btn btn-primary" type="submit">Filter reservations</button></div>
+    </div>
+  </form>
+  <div class="table-responsive">
+    <table class="table table-striped align-middle"><thead><tr><th>Reference</th><th>Customer</th><th>Vehicle</th><th>Pickup</th><th>Return</th><th>Status</th></tr></thead>
+      <tbody>{% for reservation in reservations %}<tr>
+        <td><a href="{% url 'dashboard:reservation_detail' reservation.pk %}">{{ reservation.reference }}</a></td>
+        <td>{{ reservation.customer.get_full_name|default:reservation.customer.email }}</td>
+        <td>{{ reservation.vehicle }}</td><td>{{ reservation.pickup_datetime|date:"M j, Y H:i" }}</td><td>{{ reservation.return_datetime|date:"M j, Y H:i" }}</td><td><span class="status-badge status-{{ reservation.status|lower }}">{{ reservation.get_status_display }}</span></td>
+      </tr>{% empty %}<tr><td colspan="6">No reservations match these filters.</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+  {% if is_paginated %}<nav aria-label="Reservation pages"><ul class="pagination">
+    {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&amp;{{ request.GET.urlencode }}">Previous</a></li>{% endif %}
+    <li class="page-item active"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+    {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&amp;{{ request.GET.urlencode }}">Next</a></li>{% endif %}
+  </ul></nav>{% endif %}
+{% endblock %}

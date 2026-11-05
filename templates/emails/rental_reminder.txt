@@ -1,0 +1,7 @@
+Hello {{ reservation.customer.get_full_name|default:reservation.customer.email }},
+
+This is a reminder for your booking {{ reservation.reference }}.
+Vehicle: {{ reservation.vehicle }}
+{% if kind == "pickup" %}Pickup: {{ reservation.pickup_datetime }} at {{ reservation.pickup_location }}{% else %}Return: {{ reservation.return_datetime }} at {{ reservation.return_location }}{% endif %}
+
+Please have your driving licence available. Contact the rental branch if you need assistance.
